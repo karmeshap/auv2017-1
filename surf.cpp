@@ -12,6 +12,8 @@
 
 #include <opencv2/nonfree/features2d.hpp>
 
+#include <opencv2/opencv.hpp>
+
 
 
 using namespace std;
@@ -111,9 +113,9 @@ int main(int argc,char **argv)
 
 	}
 
-    std::vector<cv::DMatch> symMatches;
+    std::vector<cv::DMatch> symMatches;                                       // symmetry test
     
- /* for (vector<DMatch>::const_iterator matchIterator1= goodMatches.begin();matchIterator1!= goodMatches.end(); ++matchIterator1)
+  for (vector<DMatch>::const_iterator matchIterator1= goodMatches.begin();matchIterator1!= goodMatches.end(); ++matchIterator1)
 
   {
 
@@ -133,12 +135,45 @@ int main(int argc,char **argv)
 
     }
 
-  }*/
+  }
    
+  std::vector<cv::DMatch> bestMatches;                                                  //ransac test
+   
+double distance,confidence,minInlierRatio;
+   
+    // Convert keypoints into Point2f
+    std::vector<cv::Point2f> points1, points2;
+    for (std::vector<cv::DMatch>::const_iterator it= symMatches.begin();it!= symMatches.end(); ++it)
+    {
+        // Get the position of left keypoints
+        float x= kp1[it->queryIdx].pt.x;
+        float y= kp1[it->queryIdx].pt.y;
+        points1.push_back(cv::Point2f(x,y));
+        // Get the position of right keypoints
+        x= kp2[it->trainIdx].pt.x;
+        y= kp2[it->trainIdx].pt.y;
+        points2.push_back(cv::Point2f(x,y));
+    }
+    // Compute F matrix using RANSAC
+    std::vector<uchar> inliers(points1.size(),0);
+    cv::Mat fundemental= findFundamentalMat(cv::Mat(points1),cv::Mat(points2),inliers,CV_FM_RANSAC,distance,confidence); // confidence probability
+    // extract the surviving (inliers) matches
+    std::vector<uchar>::const_iterator
+    itIn= inliers.begin();
+    std::vector<cv::DMatch>::const_iterator
+    itM= symMatches.begin();
+    // for all matches
+    for ( ;itIn!= inliers.end(); ++itIn, ++itM)
+    {
+        if (*itIn)
+        { // it is a valid match
+            bestMatches.push_back(*itM);
+        }
+    }
 
-    Mat image3;
+ Mat image3;
 
-    drawMatches(image1,kp1,image2,kp2,goodMatches,image3,2);
+    drawMatches(image1,kp1,image2,kp2,symMatches,image3,2);
 
 
 
@@ -155,4 +190,3 @@ int main(int argc,char **argv)
 
 
 }
-
