@@ -173,7 +173,7 @@ int main(int argc, char** argv)
 	info_camera1.P[10]=1.000000;
 	info_camera1.P[11]=0.000000;
 	
-        pub1.publish(msg1,info_camera1);
+        pub1.publish(msg1,info_camera1,stamp1);
        
         ros::spinOnce();
         loop_rate.sleep();
