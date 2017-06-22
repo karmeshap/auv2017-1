@@ -1,0 +1,8 @@
+<launch>
+   <node name="publisher" type="publisher" pkg="beginners_tutorials" respawn="true" output="screen">
+        <rosparam command="load" file="$(find beginners_tutorials)/left.yaml"/>
+   </node>
+   <node name="publisher1" type="publisher1" pkg="beginners_tutorials" respawn="true" output="screen">
+        <rosparam command="load" file="$(find beginners_tutorials)/right.yaml"/>
+   </node>
+ </launch>
